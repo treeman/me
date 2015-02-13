@@ -43,10 +43,10 @@ Use postgres backend
 
 For login: `psql -U postgres`
 
+Show databases: `\l`
+Select database: `\c db`
+List of tables: `\d`
+Describe a table: `\d`
+
 :)
-
-Tests
-=====
-
-`prove -e perl6`
 
