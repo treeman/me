@@ -36,3 +36,17 @@ Inspiration
 
 <http://aprilzero.com>
 
+Database
+========
+
+Use postgres backend
+
+For login: `psql -U postgres`
+
+:)
+
+Tests
+=====
+
+`prove -e perl6`
+
