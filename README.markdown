@@ -13,6 +13,14 @@ Ticker
 * netrunner events (?)
 * RSS feeds
 
+Organize
+
+category (netrunner, manga, tv-series, ...)
+type (news) ??
+title (The Valley, One Piece, ...)
+id (unique event id?)
+tags (?)
+
 Logger
 ------
 

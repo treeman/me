@@ -9,13 +9,19 @@ sub parse_upcoming (Str $txt) is export {
             # product: name
             # is_reprint: true/false
             # expected_by, expected_by_override
-            # collection: Deluxe/Cycle Data Packs
-            say "Found a netrunner thing: ", $x<product>;
+            # collection: Deluxe Expansion
+            #             <cycle> Data Packs
 
             my %info = (
+                category => "netrunner",
                 product => $x<product>,
                 status => parse_status($x<name>),
+                location => "Fantasy Flight Games",
+                type => $x<collection>,
             );
+
+            # TODO store updates or something
+            say %info;
         }
 
         parse_status($x<name>);
