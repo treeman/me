@@ -1,22 +1,35 @@
 Wants
 =====
 
+* Incorporate with habitrpg
+* Incorporated irc bot
+
+Ticker
+------
+
+* manga updates
+* tv updates
+* netrunner datapacks
+* netrunner events (?)
+* RSS feeds
+
+Logger
+------
+
 * Food list/planning
 * Training log
     Track gym progress
 * Track books read
+* Track github/bitbucket commits etc
+* Blog posts
+* Log expenses/budget (replace ynab?)
+
+Planner
+-------
 
 * Todos
-* Incorporate with habitrpg
 * Calendar (incorporate/replace google calendar)
-* Track blog posts
 * Organize (replace org?)
-* Track github/bitbucket commits etc
-* Track manga/tv series (replace ticker)
-* Incorporated irc bot
-
-* RSS feeds
-* Log expenses (replace ynab?)
 
 Tech
 ====
@@ -47,6 +60,20 @@ Show databases: `\l`
 Select database: `\c db`
 List of tables: `\d`
 Describe a table: `\d`
+Run sql filee: `\i db.sql`
 
 :)
+
+Use database `me`
+
+```{.sql}
+CREATE DATABASE me
+```
+
+Dates
+=====
+
+2015-02-15T15:00:00.000Z
+
+<http://en.wikipedia.org/wiki/ISO_8601>
 
