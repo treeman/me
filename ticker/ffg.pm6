@@ -1,22 +1,45 @@
+# TODO error handling
+# TODO cleanup
 module ffg;
 
 use DBIish;
+use JSON::Tiny;
+use db;
 
-sub update_upcoming ($txt, $db) is export {
-    my @res = parse_upcoming($txt);
-    for (@res) -> $x {
-        say $x.perl;
-        #say make_id($x);
+sub ffg_update_upcoming ($db, $txt) is export {
+    my @upcoming = collect_new($db, parse_upcoming($txt));
+    for (@upcoming) -> $obj {
+        my $json_obj = to-json(%$obj);
+        db_insert_event($db, $json_obj);
     }
 }
 
-#sub make_id ($info) {
-    #return %$info<category>;
-#}
+sub collect_new ($db, @parsed) {
+    return @parsed.grep({ is_new($db, $_) });
+}
+
+# TODO filter away somehow?
+sub is_new ($db, $obj) {
+    my $latest = select_latest($db, $obj);
+    return True unless $latest;
+
+    $latest = from-json($latest);
+    return %$latest<status> ne %$obj<status>;
+}
+
+sub select_latest ($db, $obj) {
+    my $sth = $db.prepare(q:to/STATEMENT/);
+        SELECT * FROM events WHERE object->>'product' = ?
+        ORDER BY created DESC LIMIT 1
+        STATEMENT
+    $sth.execute(%$obj<product>);
+
+    return $sth.fetchrow_hashref()<object>;
+}
 
 # Parse upcoming info.
 # TODO do something more intelligent with json value
-sub parse_upcoming (Str $txt) is export {
+sub parse_upcoming (Str $txt) {
     my $json = parse_upcoming_json ($txt);
     my @res;
     for (@$json) -> $x {
@@ -51,13 +74,17 @@ sub parse_upcoming_json (Str $txt) {
     }
 }
 
-# TODO remove grammar, use a array/hash of allowed things.
+# XXX remove grammar, use a array/hash of allowed things?
 grammar Status {
     token TOP { ^ <status> $ }
 
     #ConceptStage InDev AwaitingReprint AtPrinter OnBoat Shipping Available
     rule status {
-        Shipping Now | On the Boat | Awaiting Reprint | In Development | At the Printer
+        Shipping Now
+      | On the Boat
+      | Awaiting Reprint
+      | In Development
+      | At the Printer
     }
 }
 
@@ -66,7 +93,7 @@ sub parse_status(Str $txt) {
     # TODO normalize?
     if $m { return ~$m<status> }
     else {
-        warn "Could not parse FFG status for: '$txt'";
+        warn "WARNING Could not parse FFG status for: '$txt'";
         return "";
     }
 }
