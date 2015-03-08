@@ -1,9 +1,24 @@
 module ffg;
 
+use DBIish;
+
+sub update_upcoming ($txt, $db) is export {
+    my @res = parse_upcoming($txt);
+    for (@res) -> $x {
+        say $x.perl;
+        #say make_id($x);
+    }
+}
+
+#sub make_id ($info) {
+    #return %$info<category>;
+#}
+
 # Parse upcoming info.
 # TODO do something more intelligent with json value
 sub parse_upcoming (Str $txt) is export {
     my $json = parse_upcoming_json ($txt);
+    my @res;
     for (@$json) -> $x {
         if $x<collection_crumbs> ~~ /:i netrunner/ {
             # product: name
@@ -12,20 +27,17 @@ sub parse_upcoming (Str $txt) is export {
             # collection: Deluxe Expansion
             #             <cycle> Data Packs
 
-            my %info = (
+            my $info = [
                 category => "netrunner",
                 product => $x<product>,
                 status => parse_status($x<name>),
                 location => "Fantasy Flight Games",
                 type => $x<collection>,
-            );
-
-            # TODO store updates or something
-            say %info;
+            ];
+            @res.push($info);
         }
-
-        parse_status($x<name>);
     }
+    return @res;
 }
 
 sub parse_upcoming_json (Str $txt) {

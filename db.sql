@@ -1,5 +1,8 @@
+DROP TABLE IF EXISTS events;
+
 CREATE TABLE events (
-    id varchar(200) UNIQUE,
-    object json
+    object json,
+    seen BOOLEAN DEFAULT FALSE,
+    created TIMESTAMP WITH time zone DEFAULT current_timestamp
 );
 
