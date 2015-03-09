@@ -8,6 +8,7 @@ use JSON::Tiny;
 use lib '.'; # Add current search directory for lib search
 use ffg;
 use db;
+use serieborsen;
 
 # XXX Must have https requests, but
 # $ panda install IO::Socket::SSL
@@ -35,8 +36,9 @@ multi MAIN('update') {
 
     my $db = db_connect();
 
-    ffg_update_upcoming($db, slurp("../data/ffg_upcoming.html"));
-    db_examine_events($db);
+    #ffg_update_upcoming($db, slurp("../data/ffg_upcoming.html"));
+    serieborsen_update_upcoming($db, slurp("../data/serieborsen.html"));
+    #db_examine_events($db);
 
     $db.disconnect;
 }
@@ -47,7 +49,11 @@ multi MAIN(Bool :$mark) {
     # Print ticker stream by default
     my @events = db_event_stream($db);
     for (@events) -> $x {
-        say $x;
+        my ($json_obj, $seen, $created) = @$x;
+        my $obj = from-json($json_obj);
+
+        # TODO different printing for different events
+        say "$obj<product>   ($obj<status> @ $obj<location>)";
     }
 
     # Mark everything as seen
@@ -70,3 +76,4 @@ multi MAIN('test') {
 
     $db.disconnect;
 }
+

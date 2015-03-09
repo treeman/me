@@ -9,6 +9,7 @@ use db;
 sub ffg_update_upcoming ($db, $txt) is export {
     my @upcoming = collect_new($db, parse_upcoming($txt));
     for (@upcoming) -> $obj {
+        say "NEW %$obj<product> (%$obj<status>)";
         my $json_obj = to-json(%$obj);
         db_insert_event($db, $json_obj);
     }
@@ -63,10 +64,15 @@ sub parse_upcoming (Str $txt) {
     return @res;
 }
 
+grammar Upcoming {
+    token TOP { <data_capture> }
+
+    rule data_capture { upcoming_data \= (<-[ ; ]>+) \; };
+}
+
 sub parse_upcoming_json (Str $txt) {
-    my rule data_capture { upcoming_data \= (<-[ ; ]>+) \; };
-    if $txt ~~ / <data_capture> / {
-        return from-json (~$/<data_capture>[0]);
+    if $txt ~~ / <Upcoming::TOP> / {
+        return from-json (~$/<Upcoming::TOP><data_capture>[0]);
     }
     else {
         # TODO instead of dying, do some error checking!
@@ -102,3 +108,4 @@ sub parse_status(Str $txt) {
 #my $txt = "Shipping Now";
 #my $status = parse_status($txt);
 #say $status;
+
