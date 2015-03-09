@@ -4,6 +4,7 @@ use v6;
 use DBIish;
 use JSON::Tiny;
 #use Grammar::Debugger;
+use LWP::Simple;
 
 use lib '.'; # Add current search directory for lib search
 use ffg;
@@ -36,9 +37,21 @@ multi MAIN('update') {
 
     my $db = db_connect();
 
-    #ffg_update_upcoming($db, slurp("../data/ffg_upcoming.html"));
-    serieborsen_update_upcoming($db, slurp("../data/serieborsen.html"));
-    #db_examine_events($db);
+    {
+        #my $url = 'https://fantasyflightgames.com/en/upcoming/';
+        #my $html = qq:x/curl "$url"/;
+
+        #ffg_update_upcoming($db, $html);
+    }
+
+    {
+        # TODO malformed utf-8
+        # encoded in iso...
+        my $url = 'http://www.serieborsen.se/kortspel.html';
+        my $html = qq:x/curl "$url"/;
+        say $html;
+        #serieborsen_update_upcoming($db, $html);
+    }
 
     $db.disconnect;
 }
@@ -52,9 +65,20 @@ multi MAIN(Bool :$mark) {
         my ($json_obj, $seen, $created) = @$x;
         my $obj = from-json($json_obj);
 
+        # TODO something smarter is needed...
+        my $status = $obj<status>;
+        $status = $obj<price> unless $status;
+
         # TODO different printing for different events
-        say "$obj<product>   ($obj<status> @ $obj<location>)";
+        # TODO table width
+        say "$obj<product> | $obj<location> ($status)";
+        my $dt = DateTime.new($created);
+        say $dt; # TODO format?
     }
+
+    #for DateTime.^methods() {
+        #say $_.name;
+    #}
 
     # Mark everything as seen
     if $mark {
@@ -68,11 +92,13 @@ multi MAIN('test') {
     my $db = db_connect();
 
     db_delete_events($db);
+
     ffg_update_upcoming($db, slurp("../data/ffg_upcoming.html"));
+    serieborsen_update_upcoming($db, slurp("../data/serieborsen.html"));
 
     db_examine_events($db);
-    db_mark_seen($db);
-    db_examine_events($db);
+    #db_mark_seen($db);
+    #db_examine_events($db);
 
     $db.disconnect;
 }

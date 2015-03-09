@@ -5,9 +5,9 @@ use JSON::Tiny;
 use db;
 
 sub serieborsen_update_upcoming ($db, $txt) is export {
-    my @upcoming = collect_new($db, parse_upcoming($txt));
-    for (@upcoming) -> $obj {
-        say "NEW %$obj<product> (%$obj<status>)";
+    my @stock = collect_new($db, parse_stock($txt));
+    for (@stock) -> $obj {
+        say "NEW %$obj<product> (%$obj<price>:-)";
         my $json_obj = to-json(%$obj);
         db_insert_event($db, $json_obj);
     }
@@ -19,28 +19,21 @@ sub collect_new ($db, @parsed) {
 
 # TODO filter away somehow?
 sub is_new ($db, $obj) {
-    my $latest = select_latest($db, $obj);
+    my $latest = db_select_latest($db, $obj);
     return True unless $latest;
 
     $latest = from-json($latest);
-    return %$latest<status> ne %$obj<status>;
+    return %$latest<price> ne %$obj<price>;
 }
 
-sub select_latest ($db, $obj) {
-    my $sth = $db.prepare(q:to/STATEMENT/);
-        SELECT * FROM events WHERE object->>'product' = ?
-        ORDER BY created DESC LIMIT 1
-        STATEMENT
-    $sth.execute(%$obj<product>);
-
-    return $sth.fetchrow_hashref()<object>;
-}
-
+# Just a stupid grammar...
+# Works but it's stupid and inefficient.
+# Might redo it if it breaks, heh!
 grammar StockList {
     rule TOP {
         <preface>
+        #{ say ~$/<preface><title> }
         <content>
-        { say ">>> DONE (content)<<<\n", $/<content><table><content_row> }
     }
 
     rule preface {
@@ -57,8 +50,9 @@ grammar StockList {
     }
 
     rule table {
+        <tag('p')>*
         '<' table <attribute>* '>'
-        '<' tbody '>'
+        '<' tbody <attribute>* '>'
         <content_row>*
         '</' tbody '>'
         '</' table '>'
@@ -94,55 +88,94 @@ grammar StockList {
         '</' $x '>'
     }
 
-    rule title { 
-        '<' p '>'
-        '<span' class \= '"rubrik"' <attribute>* '>'
-        'ANDROID:' NETRUNNER
-        '</span>'
+    rule title {
+        # TODO somewhere here Yu-Gi-Oh! and others break
+        '<' p <attribute>* '>' 
+        '<' (\w+) class \= '"rubrik"' <attribute>* '>'
+        (<xml>) # Actual title
+        '</' $0 '>'
         '</' p '>'
     }
 }
 
 # Parse upcoming info.
-# TODO do something more intelligent with json value
-sub parse_upcoming (Str $txt) {
-    #while $txt ~~ / <StockList::TOP> / {
-        #say $/;
-    #}
-    #say "DONE";
-    for $txt ~~ m:exhaustive/<StockList::TOP>/ -> $m {
-        #say "NEW";
-        #say ~$m;
-        say $m.from;
-        #if ~$m ~~ / NETRUNNER / {
-            #say ~$/;
-            #}
-    }
-    #if $txt ~~ / <StockList::TOP> / {
-        #say $/;
-        ##return from-json (~$/<Upcoming::TOP><data_capture>[0]);
-    #}
-    #else {
-        ## TODO instead of dying, do some error checking!
-        #die "Could not parse upcoming data!";
-    #}
-
+sub parse_stock (Str $txt) {
     my @res;
-    #for (@$json) -> $x {
-        #say $x;
-        ##if $x<collection_crumbs> ~~ /:i netrunner/ {
+    for $txt ~~ m:exhaustive/<StockList::TOP>/ -> $m {
+        @res.push(construct_content($m));
+    }
 
-            ##my $info = [
-                ##category => "netrunner",
-                ##product => $x<product>,
-                ##status => "In Stock / Out of Stock",
-                ##location => "Seriebörsen",
-                ###type => "Remov??",
-            ##];
-            ##@res.push($info);
-        ##}
-    #}
     return @res;
 }
 
+# TODO test these
+grammar Item {
+    rule TOP {
+        ^
+        <name>
+        <id>?
+    }
+
+    token name {
+        (<-[<>()]>+)
+    }
+
+    rule id {
+        '('
+        (<-[)]>+)
+        ')'
+    }
+}
+
+# Construct a list of parsed packs from parse tree
+sub construct_content ($m) {
+    my @res;
+
+    # TODO better filtering
+    my $title = ~$m<StockList::TOP><preface><title>[1];
+    next unless $title ~~ m/:i netrunner/;
+
+    # XXX This is hilariously stupid... :D
+    # TODO fix this, use Grammar.subparse (but that needs a start location!)
+    # Anyways might want to prettify!!
+    my $rows = $m<StockList::TOP><content><table><content_row>;
+    for (@$rows) -> $x {
+        for (@$x) -> $y {
+            my $product = ~$y<td>[0][0];
+            $product ~~ s:g/ '&nbsp;' //;
+
+            my $price = ~$y<td>[1][0];
+            $price ~~ s:g/ '&nbsp;' //;
+
+            if $price ~~ m/:i slut / {
+                #say "Skipping: $product because of: $price";
+                next;
+            }
+
+            if Item.subparse($product) {
+                my $product = ~$/<name>.trim();
+                my $info = [
+                    category => "netrunner",
+                    product => $product,
+                    price => $price,
+                    location => "Seriebörsen",
+                    # XXX data pack/deluxe or something?
+                    #type => $x<collection>,
+                ];
+
+                @res.push($info);
+            }
+            #else {
+                #say "FAIL    '$name'";
+            #}
+        }
+    }
+
+    return @res;
+}
+
+# How to check existing methods.
+#for StockList.^methods() {
+    #say $_.name;
+#}
 

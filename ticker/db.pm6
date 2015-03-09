@@ -15,6 +15,19 @@ sub db_insert_event ($db, $json_obj) is export {
     return $sth.execute($json_obj);
 }
 
+# TODO only for netrunner??
+sub db_select_latest ($db, $obj) is export {
+    my $sth = $db.prepare(q:to/STATEMENT/);
+        SELECT * FROM events
+        WHERE object->>'product' = ?
+        AND object->>'location' = ?
+        ORDER BY created DESC LIMIT 1
+        STATEMENT
+    $sth.execute(%$obj<product>, %$obj<location>);
+
+    return $sth.fetchrow_hashref()<object>;
+}
+
 sub db_examine_events ($db) is export {
     say "\n>>>>> events <<<<<";
     for (db_select_events($db)) -> $x {
@@ -36,7 +49,9 @@ sub db_select_events ($db) is export {
 
 sub db_event_stream ($db) is export {
     my $sth = $db.prepare(q:to/STATEMENT/);
-        SELECT * FROM events
+        SELECT object, seen,
+            to_char(created, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS created
+        FROM events
         WHERE seen = False
         ORDER BY created
         STATEMENT

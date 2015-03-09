@@ -21,21 +21,11 @@ sub collect_new ($db, @parsed) {
 
 # TODO filter away somehow?
 sub is_new ($db, $obj) {
-    my $latest = select_latest($db, $obj);
+    my $latest = db_select_latest($db, $obj);
     return True unless $latest;
 
     $latest = from-json($latest);
     return %$latest<status> ne %$obj<status>;
-}
-
-sub select_latest ($db, $obj) {
-    my $sth = $db.prepare(q:to/STATEMENT/);
-        SELECT * FROM events WHERE object->>'product' = ?
-        ORDER BY created DESC LIMIT 1
-        STATEMENT
-    $sth.execute(%$obj<product>);
-
-    return $sth.fetchrow_hashref()<object>;
 }
 
 # Parse upcoming info.
@@ -91,6 +81,7 @@ grammar Status {
       | Awaiting Reprint
       | In Development
       | At the Printer
+      | Available Now
     }
 }
 
