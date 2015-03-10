@@ -52,9 +52,9 @@ grammar StockList {
     rule table {
         <tag('p')>*
         '<' table <attribute>* '>'
-        '<' tbody <attribute>* '>'
+        #'<' tbody <attribute>* '>'
         <content_row>*
-        '</' tbody '>'
+        #'</' tbody '>'
         '</' table '>'
     }
 
