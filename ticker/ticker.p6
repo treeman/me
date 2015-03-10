@@ -4,7 +4,8 @@ use v6;
 use DBIish;
 use JSON::Tiny;
 #use Grammar::Debugger;
-use LWP::Simple;
+use DateTime::Format;
+use Term::ANSIColor;
 
 use lib '.'; # Add current search directory for lib search
 use ffg;
@@ -107,6 +108,7 @@ multi MAIN(Bool :$mark) {
         # TODO table width
         say "$obj<product> | $obj<location> ($status)";
         my $dt = DateTime.new($created);
+        say strftime("%e %b, %H:%M", $dt);
         say $dt; # TODO format?
     }
 
@@ -125,12 +127,17 @@ multi MAIN(Bool :$mark) {
 multi MAIN('test') {
     my $db = db_connect();
 
-    db_delete_events($db);
+    # TODO adjust width for output.
+    #my @rows = [];
 
-    ffg_update_upcoming($db, slurp("../data/ffg_upcoming.html"));
-    serieborsen_update_upcoming($db, slurp("../data/serieborsen.html"));
+    #say color("red"), "Red!", color("reset");
 
-    db_examine_events($db);
+    #db_delete_events($db);
+
+    #ffg_update_upcoming($db, slurp("../data/ffg_upcoming.html"));
+    #serieborsen_update_upcoming($db, slurp("../data/serieborsen.html"));
+
+    #db_examine_events($db);
     #db_mark_seen($db);
     #db_examine_events($db);
 
