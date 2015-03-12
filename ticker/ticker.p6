@@ -11,6 +11,7 @@ use lib '.'; # Add current search directory for lib search
 use ffg;
 use db;
 use serieborsen;
+use jagged;
 
 # XXX Must have https requests, but
 # $ panda install IO::Socket::SSL
@@ -96,6 +97,7 @@ multi MAIN(Bool :$mark) {
 
     # Print ticker stream by default
     my @events = db_event_stream($db);
+    my @output;
     for (@events) -> $x {
         my ($json_obj, $seen, $created) = @$x;
         my $obj = from-json($json_obj);
@@ -104,17 +106,16 @@ multi MAIN(Bool :$mark) {
         my $status = $obj<status>;
         $status = $obj<price> unless $status;
 
-        # TODO different printing for different events
-        # TODO table width
-        say "$obj<product> | $obj<location> ($status)";
+        my @row;
+        @row.push("$obj<product>");
+        @row.push("$obj<location> ($status)");
         my $dt = DateTime.new($created);
-        say strftime("%e %b, %H:%M", $dt);
-        say $dt; # TODO format?
+        @row.push(strftime("%e %b, %H:%M", $dt));
+
+        @output.push(\@row);
     }
 
-    #for DateTime.^methods() {
-        #say $_.name;
-    #}
+    .say for balanced_width_columns(@output, 2);
 
     # Mark everything as seen
     if $mark {
@@ -126,9 +127,6 @@ multi MAIN(Bool :$mark) {
 
 multi MAIN('test') {
     my $db = db_connect();
-
-    # TODO adjust width for output.
-    #my @rows = [];
 
     #say color("red"), "Red!", color("reset");
 
