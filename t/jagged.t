@@ -1,7 +1,7 @@
 use v6;
 use Test;
+BEGIN { @*INC.push: 'ticker' };
 
-use lib '../ticker/';
 use jagged;
 
 my @stuff = (
