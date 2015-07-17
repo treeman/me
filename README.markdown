@@ -8,10 +8,13 @@ Ticker
 ------
 
 * manga updates
-* tv updates
-* netrunner datapacks
-* netrunner events (?)
+    1. mangadoom
+    2. kubera one last god
+    3. tower of god naver (and magician, kubera, the gamer, ...)
+* tv updates (nextep)
+* netrunner datapacks (done?)
 * RSS feeds
+* upcoming movies (sf, imdb, ... ?)
 
 Organize
 
@@ -24,12 +27,12 @@ tags (?)
 Logger
 ------
 
-* Food list/planning
 * Training log
     Track gym progress
+* Food list/planning
 * Track books read
+* Blog posts written
 * Track github/bitbucket commits etc
-* Blog posts
 * Log expenses/budget (replace ynab?)
 
 Planner

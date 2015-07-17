@@ -78,7 +78,7 @@ multi MAIN('update') {
     my $db = db_connect();
 
     {
-        my $html = fetch_site('https://fantasyflightgames.com/en/upcoming/');
+        my $html = fetch_site('https://www.fantasyflightgames.com/en/upcoming/');
         ffg_update_upcoming($db, $html);
     }
 

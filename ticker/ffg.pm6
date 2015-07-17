@@ -81,7 +81,7 @@ grammar Status {
       | Awaiting Reprint
       | In Development
       | At the Printer
-      | Available Now
+      | In Stores Now
     }
 }
 
