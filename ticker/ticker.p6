@@ -126,7 +126,7 @@ multi MAIN(Bool :$mark) {
 }
 
 multi MAIN('test') {
-    my $db = db_connect();
+    #my $db = db_connect();
 
     #say color("red"), "Red!", color("reset");
 
@@ -139,6 +139,14 @@ multi MAIN('test') {
     #db_mark_seen($db);
     #db_examine_events($db);
 
-    $db.disconnect;
+    #$db.disconnect;
+    #
+    #say dir 'plugins';
+
+    # Create a class/functino structure?
+    my @plugins = dir 'plugins';
+    for (@plugins) -> $f {
+        require $f;
+    }
 }
 
