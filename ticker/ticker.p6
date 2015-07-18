@@ -8,9 +8,7 @@ use DateTime::Format;
 use Term::ANSIColor;
 
 use lib '.'; # Add current search directory for lib search
-use ffg;
 use db;
-use serieborsen;
 use jagged;
 use download;
 
@@ -73,5 +71,10 @@ multi MAIN(Bool :$mark) {
 }
 
 multi MAIN('test') {
+    my $db = db::DB.new;
+
+    use plugins::kubera;
+    my $c = Kubera.new;
+    $c.update($db);
 }
 
