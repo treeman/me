@@ -1,20 +1,34 @@
-use plugins::plugin;
+use parser;
 
-class Kubera does Plugin {
+class Kubera does Parser {
 
     method update ($db) {
-        #my $url = 'http://kubera-tn.weebly.com/blog';
-        #say "Checking $url";
-        #my $html = download::site($url);
-        my $html = slurp("kubera.html");
+        my $url = 'http://kubera-tn.weebly.com/blog';
+        say "Checking $url";
+        my $html = download::site($url);
+        #my $html = slurp("kubera.html");
 
-        self.parse($html);
-        #my @new = self.filter_new($db, @upcoming);
-        #for (@new) -> $x {
-            #say "NEW %$x<product> (%$x<status>:-)";
-            #my $json = to-json(%$x);
-            #$db.insert_event($json);
-        #}
+        my $curr = self.parse($html);
+        if self.is_new($db, $curr) {
+            say "NEW %$curr<manga> s%$curr<season>e%$curr<chapter>";
+            my $json = to-json(%$curr);
+            $db.insert_event($json);
+        }
+    }
+
+    method is_new ($db, $x) {
+        my $sql = q:to/STATEMENT/;
+            SELECT * FROM events
+            WHERE object->>'manga' = 'Kubera'
+            AND object->>'location' = ?
+            ORDER BY object->>'ref_id' DESC LIMIT 1
+            STATEMENT
+        my $last = $db.select_one($sql, %$x<location>)<object>;
+        return True unless $last;
+
+        $last = from-json($last);
+
+        return %$x<ref_id> > $last<ref_id>;
     }
 
     grammar Entry {
@@ -57,6 +71,7 @@ class Kubera does Plugin {
         token title { .+ }
     }
 
+    # Only fetch the latest one
     method parse (Str $txt) {
         my $latest;
         for $txt ~~ m:exhaustive/ <Entry::TOP> / -> $m {
@@ -78,7 +93,7 @@ class Kubera does Plugin {
             }
         }
 
-        say $latest;
+        return $latest;
     }
 };
 

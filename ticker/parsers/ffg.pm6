@@ -1,6 +1,6 @@
-use plugins::plugin;
+use parser;
 
-class FFG does Plugin {
+class FFG does Parser {
 
     method update ($db) {
         my $url = 'https://www.fantasyflightgames.com/en/upcoming/';

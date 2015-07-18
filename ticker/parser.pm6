@@ -1,4 +1,4 @@
-role Plugin {
+role Parser {
     method update ($db) { ... }
 };
 

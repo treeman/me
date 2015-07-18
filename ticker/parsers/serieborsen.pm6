@@ -1,6 +1,6 @@
-use plugins::plugin;
+use parser;
 
-class Serieborsen does Plugin {
+class Serieborsen does Parser {
 
     method update ($db) {
         my $url = 'http://www.serieborsen.se/kortspel.html';

@@ -66,7 +66,14 @@ class DB {
             STATEMENT
         return $sth.execute($json_obj);
     }
-#
+
+    method select_one ($sql, *@rest) {
+        my $sth = self.db.prepare($sql);
+        $sth.execute(@rest);
+
+        return $sth.fetchrow_hashref();
+    }
+
     # TODO only for netrunner??
     method select_latest ($obj) {
         my $sth = self.db.prepare(q:to/STATEMENT/);
