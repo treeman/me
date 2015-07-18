@@ -1,8 +1,4 @@
 role Plugin {
-    method notify {
-        say "HERE!!!";
-    }
-
-    method update { ... }
+    method update ($db) { ... }
 };
 

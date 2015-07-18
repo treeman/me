@@ -14,23 +14,30 @@ use serieborsen;
 use jagged;
 use download;
 
+sub list_plugins() {
+    # Would like to find this list dynamically on runtime.
+    # But I couldn't figure out how to load the classes.
+    use plugins::serieborsen;
+    use plugins::ffg;
+
+    my @plugins = (
+        Serieborsen.new;
+        FFG.new;
+    );
+
+    return @plugins;
+}
+
+
 multi MAIN('update') {
     say "Updating...";
 
     my $db = db::DB.new;
+    my @plugins = list_plugins;
 
-    {
-        my $html = download::site('https://www.fantasyflightgames.com/en/upcoming/');
-        ffg_update_upcoming($db, $html);
+    for (@plugins) -> $x {
+        $x.update($db);
     }
-
-    {
-        # TODO they changed their site!
-        my $html = download::site('http://www.serieborsen.se/kortspel.html');
-        serieborsen_update_upcoming($db, $html);
-    }
-
-    $db.disconnect;
 }
 
 multi MAIN(Bool :$mark) {
@@ -65,28 +72,6 @@ multi MAIN(Bool :$mark) {
     }
 }
 
-sub list_plugins() {
-    # Would like to find this list dynamically on runtime.
-    # But I couldn't figure out how to load the classes.
-    use plugins::test;
-    my @plugins = (
-        Test.new;
-    );
-
-    return @plugins;
-}
-
 multi MAIN('test') {
-    #my $db = db::DB.new;
-    #my @plugins = list_plugins;
-
-    #for (@plugins) -> $x {
-        #$x.update;
-    #}
-    #my $html = fetch_non_utf8_site('https://www.fantasyflightgames.com/en/upcoming/');
-    #say $html;
-
-    #my $html = fetch_non_utf8_site('http://www.serieborsen.se/kortspel.html');
-    #say $html;
 }
 

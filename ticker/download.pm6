@@ -1,6 +1,6 @@
 module download;
 
-# Could possibly use LWP::Simple or something,
+# TODO Could possibly use LWP::Simple or something,
 # but ssl doesn't work...?
 our sub site (Str $url) {
     # This breaks with non utf-8 sites.
@@ -25,7 +25,7 @@ sub non_utf8_site (Str $url) {
     # TODO how to automatically generate?
     my $tmpfile = "$*TMPDIR/tmp_download.html";
 
-    my $exit_code = run 'curl', '-o', $tmpfile, $url;
+    my $exit_code = run 'curl', '-s', '-o', $tmpfile, $url;
     if $exit_code == 0 {
 
         my $encoding = get_encoding($tmpfile);

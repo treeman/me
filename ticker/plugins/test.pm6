@@ -1,7 +1,7 @@
 use plugins::plugin;
 
 class Test does Plugin {
-    method update {
+    method update ($db) {
         say "in Test::update";
     }
 };
