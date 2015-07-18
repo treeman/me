@@ -9,10 +9,10 @@ Ticker
 
 * manga updates
     1. mangadoom
-    2. kubera one last god
-    3. tower of god naver (and magician, kubera, the gamer, ...)
+    2. tower of god naver (and magician, kubera, the gamer, ...)
 * tv updates (nextep)
-* netrunner datapacks (done?)
+* FFG game of thrones 2nd edition!
+* netrunner datapacks (worldofboardgames/prisjakt)
 * RSS feeds
 * upcoming movies (sf, imdb, ... ?)
 
