@@ -11,7 +11,7 @@ sub ffg_update_upcoming ($db, $txt) is export {
     for (@upcoming) -> $obj {
         say "NEW %$obj<product> (%$obj<status>)";
         my $json_obj = to-json(%$obj);
-        db_insert_event($db, $json_obj);
+        $db.db_insert_event($json_obj);
     }
 }
 
@@ -21,7 +21,7 @@ sub collect_new ($db, @parsed) {
 
 # TODO filter away somehow?
 sub is_new ($db, $obj) {
-    my $latest = db_select_latest($db, $obj);
+    my $latest = $db.select_latest($obj);
     return True unless $latest;
 
     $latest = from-json($latest);

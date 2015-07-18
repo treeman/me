@@ -9,7 +9,7 @@ sub serieborsen_update_upcoming ($db, $txt) is export {
     for (@stock) -> $obj {
         say "NEW %$obj<product> (%$obj<price>:-)";
         my $json_obj = to-json(%$obj);
-        db_insert_event($db, $json_obj);
+        $db.insert_event($json_obj);
     }
 }
 
@@ -19,7 +19,7 @@ sub collect_new ($db, @parsed) {
 
 # TODO filter away somehow?
 sub is_new ($db, $obj) {
-    my $latest = db_select_latest($db, $obj);
+    my $latest = $db.select_latest($obj);
     return True unless $latest;
 
     $latest = from-json($latest);
@@ -52,9 +52,7 @@ grammar StockList {
     rule table {
         <tag('p')>*
         '<' table <attribute>* '>'
-        #'<' tbody <attribute>* '>'
         <content_row>*
-        #'</' tbody '>'
         '</' table '>'
     }
 

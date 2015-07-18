@@ -12,59 +12,21 @@ use ffg;
 use db;
 use serieborsen;
 use jagged;
-
-# Could possibly use LWP::Simple or something,
-# but ssl doesn't work...?
-sub fetch_site (Str $url) {
-    my $html = qq:x/curl "$url"/;
-    return $html;
-}
-
-sub get_encoding (Str $file) {
-    my $encoding = qq:x/file -i $file/;
-    if $encoding ~~ / charset \= (\S+) / {
-        return ~$0;
-    }
-    else {
-        warn "WARNING could not get encoding for `$file`";
-        return "";
-    }
-}
-
-sub fetch_non_utf8_site (Str $url) {
-    # TODO how to automatically generate?
-    my $tmpfile = "$*TMPDIR/tmp_download.html";
-
-    my $exit_code = run 'curl', '-o', $tmpfile, $url;
-    if $exit_code == 0 {
-
-        my $encoding = get_encoding($tmpfile);
-        my $html = qq:x/iconv -f $encoding -t UTF-8 $tmpfile/;
-
-        unlink($tmpfile);
-
-        return $html;
-    }
-    else {
-        warn "WARNING curl failed to download `$url`";
-        return "";
-    }
-}
+use download;
 
 multi MAIN('update') {
     say "Updating...";
 
-    my $db = db_connect();
+    my $db = db::DB.new;
 
     {
-        my $html = fetch_site('https://www.fantasyflightgames.com/en/upcoming/');
+        my $html = download::site('https://www.fantasyflightgames.com/en/upcoming/');
         ffg_update_upcoming($db, $html);
     }
 
     {
         # TODO they changed their site!
-        my $html = fetch_non_utf8_site('http://www.serieborsen.se/kortspel.html');
-        #my $html = slurp("../data/serieborsen2.html");
+        my $html = download::site('http://www.serieborsen.se/kortspel.html');
         serieborsen_update_upcoming($db, $html);
     }
 
@@ -115,16 +77,16 @@ sub list_plugins() {
 }
 
 multi MAIN('test') {
-    my $db = db::DB.new;
-    #my @events = $db.select_events;
-    #my @events2 = $db.select_events;
-    #
-    #$db.examine_events;
+    #my $db = db::DB.new;
+    #my @plugins = list_plugins;
 
-    my @plugins = list_plugins;
+    #for (@plugins) -> $x {
+        #$x.update;
+    #}
+    #my $html = fetch_non_utf8_site('https://www.fantasyflightgames.com/en/upcoming/');
+    #say $html;
 
-    for (@plugins) -> $x {
-        $x.update;
-    }
+    #my $html = fetch_non_utf8_site('http://www.serieborsen.se/kortspel.html');
+    #say $html;
 }
 
