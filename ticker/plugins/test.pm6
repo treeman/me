@@ -1,3 +1,8 @@
-module test;
+use plugins::plugin;
 
-say "In test.pm6"
+class Test does Plugin {
+    method update {
+        say "in Test::update";
+    }
+};
+

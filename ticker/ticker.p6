@@ -13,29 +13,8 @@ use db;
 use serieborsen;
 use jagged;
 
-# XXX Must have https requests, but
-# $ panda install IO::Socket::SSL
-# ==> IO::Socket::SSL depends on OpenSSL
-# ==> Fetching OpenSSL
-# ==> Building OpenSSL
-# Compiling lib/OpenSSL/Bio.pm6 to mbc
-# ===SORRY!===
-# Type 'long' is not declared
-# at lib/OpenSSL/Bio.pm6:41
-# ------>     has long⏏ $.num_read;
-# Malformed has
-# at lib/OpenSSL/Bio.pm6:41
-# ------>     has ⏏long $.num_read;
-# build stage failed for OpenSSL: Failed building lib/OpenSSL/Bio.pm6
-#
-# So for now, use the almighty curl
-#my $url = 'https://fantasyflightgames.com/en/upcoming/';
-#my $html = qq:x/curl "$url"/;
-#say $html.WHAT;
-#say $html;
-
 # Could possibly use LWP::Simple or something,
-# but ssl doesn't work
+# but ssl doesn't work...?
 sub fetch_site (Str $url) {
     my $html = qq:x/curl "$url"/;
     return $html;
@@ -93,10 +72,10 @@ multi MAIN('update') {
 }
 
 multi MAIN(Bool :$mark) {
-    my $db = db_connect();
+    my $db = db::DB.new;
 
     # Print ticker stream by default
-    my @events = db_event_stream($db);
+    my @events = $db.event_stream;
     my @output;
     for (@events) -> $x {
         my ($json_obj, $seen, $created) = @$x;
@@ -105,6 +84,7 @@ multi MAIN(Bool :$mark) {
         # TODO something smarter is needed...
         my $status = $obj<status>;
         $status = $obj<price> unless $status;
+        $status = "?" unless $status;
 
         my @row;
         @row.push("$obj<product>");
@@ -119,34 +99,32 @@ multi MAIN(Bool :$mark) {
 
     # Mark everything as seen
     if $mark {
-        db_mark_seen($db);
+        $db.mark_seen;
     }
+}
 
-    $db.disconnect;
+sub list_plugins() {
+    # Would like to find this list dynamically on runtime.
+    # But I couldn't figure out how to load the classes.
+    use plugins::test;
+    my @plugins = (
+        Test.new;
+    );
+
+    return @plugins;
 }
 
 multi MAIN('test') {
-    #my $db = db_connect();
-
-    #say color("red"), "Red!", color("reset");
-
-    #db_delete_events($db);
-
-    #ffg_update_upcoming($db, slurp("../data/ffg_upcoming.html"));
-    #serieborsen_update_upcoming($db, slurp("../data/serieborsen.html"));
-
-    #db_examine_events($db);
-    #db_mark_seen($db);
-    #db_examine_events($db);
-
-    #$db.disconnect;
+    my $db = db::DB.new;
+    #my @events = $db.select_events;
+    #my @events2 = $db.select_events;
     #
-    #say dir 'plugins';
+    #$db.examine_events;
 
-    # Create a class/functino structure?
-    my @plugins = dir 'plugins';
-    for (@plugins) -> $f {
-        require $f;
+    my @plugins = list_plugins;
+
+    for (@plugins) -> $x {
+        $x.update;
     }
 }
 
