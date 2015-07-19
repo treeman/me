@@ -9,11 +9,24 @@ use Term::ANSIColor;
 
 use lib '.'; # Add current search directory for lib search
 
-grammar Entry {
+grammar Training {
     rule TOP {
+        <entry>*
+    }
+
+    rule entry {
         ^^ <datetime>
-        ^^ <category> #[':' <description>]?
-        ^^ <exercise>
+        <category> [':' <description>]?
+        [^^ <exercise>]*
+        [^^ <comment>]?
+    }
+
+    rule comment {
+        '#' <text>
+    }
+
+    rule text {
+        \N+
     }
 
     rule datetime {
@@ -35,7 +48,8 @@ grammar Entry {
     token category { <-[:\n]>+ }
     token description { \V+ }
 
-    token exercise {
+    rule exercise {
+        '*'
         <exercise_count>
         <exercise_name>
         <reps>
@@ -43,25 +57,33 @@ grammar Entry {
 
     token exercise_count {
         \d+ x [\d+ | '?']
+        ['s' | 'kg' | 'min' | 'h']?
     }
 
-    token exercise_name { \D+ }
+    token exercise_name { \w+ [\s \w+]* }
 
     rule reps {
         <rep>
         [',' <rep>]*
     }
 
-    token rep { \d+ | 'x' }
+    token rep { <real> | 'x' | 'v' }
+
+    token real { \d+ ['.' \d+]? }
 }
 
 multi MAIN {
     my $txt = slurp("../scrap/training_file");
     say $txt;
 
-    for $txt ~~ m:exhaustive/ <Entry::TOP> / -> $m {
-        say $m;
-        exit;
-    }
+    my $m = Training.parse($txt);
+    say $m;
+
+    #for $txt ~~ m:exhaustive/ <Training::TOP> / -> $m {
+        #say ">>>>>>>>>>>>>>>>";
+        #say $m;
+        #say "<<<<<<<<<<<<<<<<";
+        #exit;
+    #}
 }
 
