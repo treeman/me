@@ -67,6 +67,13 @@ class DB {
         return $sth.execute($json_obj);
     }
 
+    method select ($sql, *@rest) {
+        my $sth = self.db.prepare($sql);
+        $sth.execute(@rest);
+
+        return @($sth.fetchall_arrayref());
+    }
+
     method select_one ($sql, *@rest) {
         my $sth = self.db.prepare($sql);
         $sth.execute(@rest);

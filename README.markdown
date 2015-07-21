@@ -81,10 +81,32 @@ Use database `me`
 CREATE DATABASE me
 ```
 
+Remove events with unused objects:
+
+```
+DELETE FROM events WHERE object::jsonb ? 'category' = 'f';
+```
+
+
 Dates
 =====
 
 2015-02-15T15:00:00.000Z
 
 <http://en.wikipedia.org/wiki/ISO_8601>
+
+Perl
+====
+
+Run a single test:
+
+```
+perl6 t/file.t
+```
+
+Run several tests:
+
+```
+prove -re perl6
+```
 

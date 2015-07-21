@@ -92,8 +92,8 @@ multi MAIN(Bool :$mark) {
 multi MAIN('test') {
     my $db = db::DB.new;
 
-    use parsers::kubera;
-    my $c = Kubera.new;
+    use parsers::naver;
+    my $c = Naver.new;
     $c.update($db);
 }
 
