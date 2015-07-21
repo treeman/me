@@ -2,7 +2,8 @@ use parser;
 
 class FFG does Parser {
 
-    method update ($db) {
+    # TODO also check game of thrones!
+    method update ($db, $conf) {
         my $url = 'https://www.fantasyflightgames.com/en/upcoming/';
         say "Checking $url";
         my $html = download::site($url);

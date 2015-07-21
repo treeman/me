@@ -1,4 +1,8 @@
 #!/usr/local/bin/perl6
+#
+# TODO need to escape/unescape html across the board?!?
+# https://perl6advent.wordpress.com/2010/12/21/day-21-transliteration-and-beyond/
+# Could not find a module...!?
 
 use v6;
 use DBIish;
@@ -18,25 +22,33 @@ sub list_parsers() {
     use parsers::serieborsen;
     use parsers::ffg;
     use parsers::kubera;
+    use parsers::naver;
+    use parsers::mangadoom;
 
     my @parsers = (
         Serieborsen.new,
         FFG.new,
         Kubera.new,
+        Naver.new,
+        Mangadoom.new,
     );
 
     return @parsers;
 }
 
+sub get_conf() {
+    return from-json(slurp("ticker.json"));
+}
 
 multi MAIN('update') {
     say "Updating...";
 
+    my $conf = get_conf();
     my $db = db::DB.new;
     my @parsers = list_parsers;
 
     for (@parsers) -> $x {
-        $x.update($db);
+        $x.update($db, $conf);
     }
 }
 
@@ -90,10 +102,11 @@ multi MAIN(Bool :$mark) {
 }
 
 multi MAIN('test') {
+    my $conf = get_conf();
     my $db = db::DB.new;
 
     use parsers::naver;
     my $c = Naver.new;
-    $c.update($db);
+    $c.update($db, $conf);
 }
 

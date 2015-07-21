@@ -1,4 +1,4 @@
 role Parser {
-    method update ($db) { ... }
+    method update ($db, $conf) { ... }
 };
 

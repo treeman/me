@@ -8,8 +8,8 @@ Ticker
 ------
 
 * manga updates
-    1. mangadoom
-    2. tower of god naver (and magician, kubera, the gamer, ...)
+    1. mangareader
+    2. mangastream
 * tv updates (nextep)
 * FFG game of thrones 2nd edition!
 * netrunner datapacks (worldofboardgames/prisjakt)

@@ -2,7 +2,7 @@ use parser;
 
 class Kubera does Parser {
 
-    method update ($db) {
+    method update ($db, $conf) {
         my $url = 'http://kubera-tn.weebly.com/blog';
         say "Checking $url";
         my $html = download::site($url);

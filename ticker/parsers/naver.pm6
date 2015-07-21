@@ -4,12 +4,10 @@ use parser;
 
 class Naver does Parser {
 
-    method update ($db) {
-        # TODO read follows from config or something!
-        self.update_series($db, 183559, "Tower of God");
-        self.update_series($db, 358422, "Girls of the Wild's");
-        self.update_series($db, 552960, "The Gamer");
-        self.update_series($db, 24965, "Magician");
+    method update ($db, $conf) {
+        for (@($conf<naver>)) -> $x {
+            self.update_series($db, $x<id>, $x<title>);
+        }
     }
 
     method update_series ($db, Int $title_id, Str $manga) {

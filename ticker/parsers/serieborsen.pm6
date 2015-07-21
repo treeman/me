@@ -2,7 +2,7 @@ use parser;
 
 class Serieborsen does Parser {
 
-    method update ($db) {
+    method update ($db, $conf) {
         my $url = 'http://www.serieborsen.se/kortspel.html';
         say "Checking $url";
         my $html = download::site($url);
