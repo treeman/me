@@ -1,3 +1,11 @@
+TODO
+====
+
+1. Ticker log
+2. Ticker more config (FFG)
+3. Tv series
+4. Pretty printing (plugins)
+
 Wants
 =====
 
@@ -109,4 +117,3 @@ Run several tests:
 ```
 prove -re perl6
 ```
-
